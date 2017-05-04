@@ -13,27 +13,37 @@ Parse through the list of file under given directory and create the following ou
 '''
 #!/usr/bin/python
 
-import os
+import os, sys
 import json
+import hashlib
 from datetime import datetime
 
-def main():
-    recordings_dict = {'data': {'recordings':[]}}  # Create an empty dict
+def recordings(input_path, output_file):
+    recordings_dict = {'data': []}  # Create an empty dict
 
-    for root, dirs, files in os.walk("."):
+    for root, dirs, files in os.walk(input_path):
         for file in files:
             if file.endswith(".mp4"):
+                file_path = os.path.join(root, file)
                 file_data = {'fileName': os.path.basename(file),
-                             'recordingDate': datetime.fromtimestamp(int(os.stat(file).st_ctime)).strftime('%Y-%m-%d %H:%M:%S'),
-                             'recordingDate': int(os.stat(file).st_ctime),
+                             'fileId': hashlib.md5(os.path.basename(file)).hexdigest(),
+                             'recordingDate': datetime.fromtimestamp(int(os.stat(file_path).st_ctime)).strftime('%Y-%m-%d %H:%M:%S'),
+                             'recordingDate': int(os.stat(file_path).st_ctime),
                              'author': 'Amitabh Bachan',
-                             'url': 'http://<bucket_name>/<folder>/%s'%(os.path.basename(file))}
-                recordings_dict['data']['recordings'].append(dict(file_data))
+                             'url': 'http://<bucket_name>/<folder>/%s'%(os.path.basename(file)),
+                             'url': '%s/%s'%('/app/data/voicetranscript/videos', os.path.basename(file))}
+                recordings_dict['data'].append(dict(file_data))
                 '''
                 print(os.path.join(root, file))
                 print(os.stat(file))
                 '''
     print(json.dumps(recordings_dict))
+    '''
+    Write to output a file
+    '''
+    with open(output_file, 'w') as output_file:
+        json.dump(recordings_dict, output_file)
+    return recordings_dict
 
 if __name__ == '__main__':
-    main()
+    recordings('../videos', '../metadata/recordings.json')
