@@ -25,7 +25,8 @@ def recordings(input_path, output_file):
         for file in files:
             if file.endswith(".mp4"):
                 file_path = os.path.join(root, file)
-                file_data = {'fileName': os.path.basename(file),
+                file_data = {'name': os.path.splitext(os.path.basename(file))[0],
+                             'fileName': os.path.basename(file),
                              'fileId': hashlib.md5(os.path.basename(file)).hexdigest(),
                              'recordingDate': datetime.fromtimestamp(int(os.stat(file_path).st_ctime)).strftime('%Y-%m-%d %H:%M:%S'),
                              'recordingDate': int(os.stat(file_path).st_ctime),
